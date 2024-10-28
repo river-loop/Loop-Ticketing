@@ -4,6 +4,7 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
+const Allow_origin_url_prd="https://kickoff.in.th"
 //import { qrcode } from "https://deno.land/x/qrcode@v2.0.0/mod.ts";
 
 const supabase = createClient(
@@ -150,7 +151,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
             status: 200,
             headers: {
               "Access-Control-Allow-Origin":
-                "https://loop-ticketing-uh7jtm.flutterflow.app", // Allow only your specific domain
+                Allow_origin_url_prd, // Allow only your specific domain
               "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
               "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
             },
@@ -165,7 +166,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
             status: 500,
             headers: {
               "Access-Control-Allow-Origin":
-                "https://loop-ticketing-uh7jtm.flutterflow.app", // Allow only your specific domain
+                Allow_origin_url_prd, // Allow only your specific domain
               "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
               "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
             },
@@ -185,7 +186,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
           status: 500,
           headers: {
             "Access-Control-Allow-Origin":
-              "https://loop-ticketing-uh7jtm.flutterflow.app", // Allow only your specific domain
+              Allow_origin_url_prd, // Allow only your specific domain
             "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
             "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
           },

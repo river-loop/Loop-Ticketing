@@ -4,6 +4,7 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
+const Allow_origin_url_prd="https://kickoff.in.th"
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -59,7 +60,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify(mergedEventData), {
         headers: {
           "Access-Control-Allow-Origin":
-            "https://loop-ticketing-uh7jtm.flutterflow.app", // Allow only your specific domain
+            Allow_origin_url_prd, // Allow only your specific domain
           "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
           "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
         },
@@ -74,7 +75,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify(mergedEventData), {
         headers: {
           "Access-Control-Allow-Origin":
-            "https://loop-ticketing-uh7jtm.flutterflow.app", // Allow only your specific domain
+            Allow_origin_url_prd, // Allow only your specific domain
           "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
           "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
         },

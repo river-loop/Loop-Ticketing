@@ -4,7 +4,6 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import {createClient} from 'npm:@supabase/supabase-js@2.45.4'
-
 console.log("Hello from Functions!")
 
 const supabase = createClient(
