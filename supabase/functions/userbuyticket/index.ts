@@ -24,6 +24,19 @@ interface TicketBuyModel {
 }
 
 async function userBuyTicket(req: Request): Promise<Response> {
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        "Access-Control-Allow-Origin": Allow_origin_url_prd,
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Max-Age": "86400" // Cache the preflight response for 24 hours
+      },
+    });
+  }
+  
   if (req.method === "POST") {
     try {
       const body = await req.json();
@@ -152,7 +165,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
             headers: {
               "Access-Control-Allow-Origin":
                 Allow_origin_url_prd, // Allow only your specific domain
-              "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
+              "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
               "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
             },
           },
@@ -167,7 +180,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
             headers: {
               "Access-Control-Allow-Origin":
                 Allow_origin_url_prd, // Allow only your specific domain
-              "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
+              "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
               "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
             },
           },
@@ -187,7 +200,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
           headers: {
             "Access-Control-Allow-Origin":
               Allow_origin_url_prd, // Allow only your specific domain
-            "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
+            "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
             "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
           },
         },
