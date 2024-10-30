@@ -5,6 +5,8 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 //import { qrcode } from "https://deno.land/x/qrcode@v2.0.0/mod.ts";
+//const event_manager_url = 'https://ticketing-back-office-reztop.flutterflow.app';
+const event_manager_url = 'https://kick-off-event-manager-3mgfi7.flutterflow.app';
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -15,7 +17,7 @@ Deno.serve(async (req) => {
   try {
     if (req.method !== "POST") {
       return new Response("Method not allowed", { status: 405,headers: {
-        "Access-Control-Allow-Origin": "https://ticketing-back-office-reztop.flutterflow.app", // Allow only your specific domain
+        "Access-Control-Allow-Origin": event_manager_url, // Allow only your specific domain
         "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS", // Allowed methods
         "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
       }  });
@@ -25,7 +27,7 @@ Deno.serve(async (req) => {
 
     if (!bucketName || !folderPath) {
       return new Response("Invalid request body", { status: 400,headers: {
-        "Access-Control-Allow-Origin": "https://ticketing-back-office-reztop.flutterflow.app", // Allow only your specific domain
+        "Access-Control-Allow-Origin": event_manager_url, // Allow only your specific domain
         "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS", // Allowed methods
         "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
       }  });
@@ -41,7 +43,7 @@ Deno.serve(async (req) => {
       return new Response(
         listError ? `Error listing files: ${listError.message}` : "No files found",
         { status: 500,headers: {
-          "Access-Control-Allow-Origin": "https://ticketing-back-office-reztop.flutterflow.app", // Allow only your specific domain
+          "Access-Control-Allow-Origin": event_manager_url, // Allow only your specific domain
           "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS", // Allowed methods
           "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
         } }
@@ -59,20 +61,20 @@ Deno.serve(async (req) => {
 
     if (deleteError) {
       return new Response(`Failed to delete files: ${deleteError.message}`, { status: 500,headers: {
-        "Access-Control-Allow-Origin": "https://ticketing-back-office-reztop.flutterflow.app", // Allow only your specific domain
+        "Access-Control-Allow-Origin": event_manager_url, // Allow only your specific domain
         "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS", // Allowed methods
         "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
       } });
     }
 
     return new Response("All files deleted successfully", { status: 200,headers: {
-      "Access-Control-Allow-Origin": "https://ticketing-back-office-reztop.flutterflow.app", // Allow only your specific domain
+      "Access-Control-Allow-Origin": event_manager_url, // Allow only your specific domain
       "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS", // Allowed methods
       "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
     } });
   } catch (error) {
     return new Response(`Error: ${error.message}`, { status: 500,headers: {
-      "Access-Control-Allow-Origin": "https://ticketing-back-office-reztop.flutterflow.app", // Allow only your specific domain
+      "Access-Control-Allow-Origin": event_manager_url, // Allow only your specific domain
       "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS", // Allowed methods
       "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
     } });

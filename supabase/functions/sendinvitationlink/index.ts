@@ -3,20 +3,15 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import {createClient} from 'npm:@supabase/supabase-js@2.45.4'
-
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_ANON_KEY")!
-);
-
+//const event_manager_url = 'https://ticketing-back-office-reztop.flutterflow.app';
+const event_manager_url = 'https://kick-off-event-manager-3mgfi7.flutterflow.app';
 const from_email ="no-reply@loop.co.th";
 const RESEND_API_KEY = "re_BxN48Fyr_DyPCXN8pUHHgRf548rTWR3Ck";
 
 Deno.serve(async (req) => {
 
   const corsHeaders = {
-    "Access-Control-Allow-Origin": "https://ticketing-back-office-reztop.flutterflow.app",  // Allow only your domain
+    "Access-Control-Allow-Origin": event_manager_url,  // Allow only your domain
     "Access-Control-Allow-Methods": "POST, GET, OPTIONS",  // Allowed methods
     "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
   };
@@ -36,7 +31,8 @@ Deno.serve(async (req) => {
       const subject = `Accept Inviation for Staff account[${partner_name}`;
       const text = "Please click the link below and create your account within 24 hour!";
   
-      const url = `https://ticketing-back-office-reztop.flutterflow.app/acceptInvitationPage/${invitation_id}`;
+      //const url = `https://ticketing-back-office-reztop.flutterflow.app/acceptInvitationPage/${invitation_id}`;
+      const url = `${event_manager_url}/acceptInvitationPage/${invitation_id}`;
       const html = `<p>${text}</p><br><strong><a href='${url}'>${url}</a></strong>`;
       // API key for Resend
      
