@@ -5,13 +5,14 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 //const event_manager_url = 'https://ticketing-back-office-reztop.flutterflow.app';
 const event_manager_url = 'https://kick-off-event-manager-3mgfi7.flutterflow.app';
+const Allow_origin_url_prd="*"
 const from_email ="no-reply@loop.co.th";
 const RESEND_API_KEY = "re_BxN48Fyr_DyPCXN8pUHHgRf548rTWR3Ck";
 
 Deno.serve(async (req) => {
 
   const corsHeaders = {
-    "Access-Control-Allow-Origin": event_manager_url,  // Allow only your domain
+    "Access-Control-Allow-Origin": Allow_origin_url_prd,  // Allow only your domain
     "Access-Control-Allow-Methods": "POST, GET, OPTIONS",  // Allowed methods
     "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
   };

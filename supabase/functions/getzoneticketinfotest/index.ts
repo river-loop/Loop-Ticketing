@@ -4,7 +4,10 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import {createClient} from 'npm:@supabase/supabase-js@2.45.4'
-const Allow_origin_url_prd="https://loop-ticketing-test-3hanuu.flutterflow.app"
+//const Allow_origin_url_prd="https://loop-ticketing-test-3hanuu.flutterflow.app"
+//const Allow_origin_url_prd="https://kickoff.in.th";
+const Allow_origin_url_prd="*"
+
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_ANON_KEY")!

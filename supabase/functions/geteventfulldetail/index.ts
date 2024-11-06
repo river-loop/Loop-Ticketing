@@ -4,8 +4,9 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
-const Allow_origin_url_prd="https://kickoff.in.th"
+//const Allow_origin_url_prd="https://kickoff.in.th"
 //const Allow_origin_url_prd="https://ff-debug-service-frontend-pro-ygxkweukma-uc.a.run.app"
+const Allow_origin_url_prd="*"
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,

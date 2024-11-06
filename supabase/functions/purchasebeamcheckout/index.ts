@@ -4,8 +4,11 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
-const Allow_origin_url_prd = "https://kickoff.in.th";
+//const Allow_origin_url_prd = "https://kickoff.in.th";
+//const Allow_origin_url_prd = "https://loop-ticketing-test-3hanuu.flutterflow.app";
+const Allow_origin_url_prd="*"
 //import { qrcode } from "https://deno.land/x/qrcode@v2.0.0/mod.ts";
+const beam_API_key = "w4LMUeoOf6q+7MkINc7l234dL/HyH6DAIs8CcROR8ys=";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -13,7 +16,6 @@ const supabase = createClient(
 );
 
 interface PurchaseRequest {
-  beamAPIKey: string;
   beamMerchantId: string;
   beamUrl: string;
   expiry: string;
@@ -64,7 +66,6 @@ async function purchaseBeamcheckout(req: Request): Promise<Response> {
   }
 
   const requiredFields = [
-    "beamAPIKey",
     "beamMerchantId",
     "beamUrl",
     "expiry",
@@ -111,7 +112,7 @@ async function purchaseBeamcheckout(req: Request): Promise<Response> {
 
   const purchaseUrl = `https://${body.beamUrl}/purchases/${body.beamMerchantId}`;
 
-  const auth = btoa(`${body.beamMerchantId}:${body.beamAPIKey}`);
+  const auth = btoa(`${body.beamMerchantId}:${beam_API_key}`);
 
   const headers = new Headers({
     "Content-Type": "application/json",
@@ -132,7 +133,7 @@ async function purchaseBeamcheckout(req: Request): Promise<Response> {
       totalAmount: body.amount,
     },
     redirectUrl: body.redirectUrl,
-    supportedPaymentMethods: ["qrThb","internetBanking"],
+    supportedPaymentMethods: ["qrThb","creditCard"],
   };
 
   // Call the external API
