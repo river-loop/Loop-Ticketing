@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
       // Read email data from the request body
       const { to, partner_name, invitation_id } = await req.json();
 
-      const subject = `Accept Inviation for Staff account[${partner_name}`;
+      const subject = `Accept Invitation for Staff account - ${partner_name}`;
       const text = "Please click the link below and create your account within 24 hour!";
   
       //const url = `https://ticketing-back-office-reztop.flutterflow.app/acceptInvitationPage/${invitation_id}`;
