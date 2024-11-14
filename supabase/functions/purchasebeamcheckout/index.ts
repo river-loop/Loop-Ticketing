@@ -4,19 +4,36 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
+import { verify } from "https://deno.land/x/djwt@v2.4/mod.ts";
 //const Allow_origin_url_prd = "https://kickoff.in.th";
 //const Allow_origin_url_prd = "https://loop-ticketing-test-3hanuu.flutterflow.app";
 const Allow_origin_url_prd="*"
 //import { qrcode } from "https://deno.land/x/qrcode@v2.0.0/mod.ts";
-const beam_API_key = "w4LMUeoOf6q+7MkINc7l234dL/HyH6DAIs8CcROR8ys=";
+const beam_API_key = "w4LMUeoOf6q+7MkINc7l234dL/HyH6DAIs8CcROR8ys="; //Playground
+//const beam_API_key = "BubCQsRJ4uTkFebtf2Qznym6/ttT9Dsjav9Y4L3o5vU="; //Live
+const beamMerchantId = "playground15";//Playground
+//const beamMerchantId = "loop";//Live
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_ANON_KEY")!
 );
 
+const JWT_SECRET = Deno.env.get("JWT_SECRET");
+
+async function getCryptoKey(secret: string): Promise<CryptoKey> {
+  const enc = new TextEncoder();
+  const keyData = enc.encode(secret); // Encode the secret as Uint8Array
+  return await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: { name: "SHA-256" } },
+    false,
+    ["sign", "verify"]
+  );
+}
+
 interface PurchaseRequest {
-  beamMerchantId: string;
   beamUrl: string;
   expiry: string;
   eventName: string;
@@ -39,17 +56,6 @@ interface OrderItem {
 async function purchaseBeamcheckout(req: Request): Promise<Response> {
   // Ensure it's a POST request
 
-  // CORS preflight handling
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": Allow_origin_url_prd,
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
-    });
-  }
-
   // Parse the JSON body from the request
   let body: PurchaseRequest;
   try {
@@ -66,7 +72,6 @@ async function purchaseBeamcheckout(req: Request): Promise<Response> {
   }
 
   const requiredFields = [
-    "beamMerchantId",
     "beamUrl",
     "expiry",
     "eventName",
@@ -100,7 +105,7 @@ async function purchaseBeamcheckout(req: Request): Promise<Response> {
   
   const formattedOrderItems = orderItems.map((item: OrderItem) => ({
     product: {
-        description: item.event_description,
+        description: item.total_ticket_price + " THB",
         imageUrl: item.event_coverphoto_url,
         name: item.event_name,
         price: item.total_ticket_price,
@@ -110,9 +115,9 @@ async function purchaseBeamcheckout(req: Request): Promise<Response> {
 }));
 
 
-  const purchaseUrl = `https://${body.beamUrl}/purchases/${body.beamMerchantId}`;
+  const purchaseUrl = `https://${body.beamUrl}/purchases/${beamMerchantId}`;
 
-  const auth = btoa(`${body.beamMerchantId}:${beam_API_key}`);
+  const auth = btoa(`${beamMerchantId}:${beam_API_key}`);
 
   const headers = new Headers({
     "Content-Type": "application/json",
@@ -133,7 +138,7 @@ async function purchaseBeamcheckout(req: Request): Promise<Response> {
       totalAmount: body.amount,
     },
     redirectUrl: body.redirectUrl,
-    supportedPaymentMethods: ["qrThb","creditCard"],
+    supportedPaymentMethods: ["qrThb"],
   };
 
   // Call the external API
@@ -218,6 +223,43 @@ async function getOrderItem(eventId: string,orderId: string) {
 
 
 Deno.serve(async (req) => {
+
+   // CORS preflight handling
+   if (req.method === "OPTIONS") {
+    return new Response(null, {
+      headers: {
+        "Access-Control-Allow-Origin": Allow_origin_url_prd,
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      },
+    });
+  }
+  
+  if (!JWT_SECRET) {
+    return new Response(JSON.stringify({
+      message: `JWT error: ${JWT_SECRET}`,
+    }), { status: 401, headers: {
+      "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
+      "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
+    }, });
+  }
+
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return new Response("Unauthorized: No token provided", { status: 401, headers: {
+      "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
+      "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
+    }, });
+  }
+
+  // Extract the token from the Authorization header
+  const token = authHeader.split(" ")[1];
+  const JWT_SECRET_KEY = await getCryptoKey(JWT_SECRET);
+  // Verify the JWT
+  const payload = await verify(token,JWT_SECRET_KEY);
+
   return await purchaseBeamcheckout(req);
 });
 
