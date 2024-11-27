@@ -52,6 +52,8 @@ async function userBuyTicket(req: Request): Promise<Response> {
         displayName,
         pTotalAmount,
         lstTicket,
+        pNetAmount,
+        pChargeAmount
       } = body;
 
       let tickets: TicketBuyModel[] = [];
@@ -91,6 +93,8 @@ async function userBuyTicket(req: Request): Promise<Response> {
           event_id: pEventId,
           count: totalticket,
           total_amount: pTotalAmount,
+          net_amount: pNetAmount,
+          charges_amount: pChargeAmount,
           status: STATUS_PENDING,
         }]);
 

@@ -3,11 +3,10 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import {createClient} from 'npm:@supabase/supabase-js@2.45.4'
+import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import { verify } from "https://deno.land/x/djwt@v2.4/mod.ts";
-const Allow_origin_url_prd="https://kickoff.in.th";
-//const Allow_origin_url_prd="*"
-
+//const Allow_origin_url_prd="https://kickoff.in.th";
+const Allow_origin_url_prd = "*";
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_ANON_KEY")!
@@ -27,8 +26,10 @@ async function getCryptoKey(secret: string): Promise<CryptoKey> {
   );
 }
 
-async function getPreviousEventByUserId(userId: string) {
-  const { data, error } = await supabase.rpc("get_previous_event", { input_user_id: userId });
+async function getOrderBreakdown(orderId: string) {
+  const { data, error } = await supabase.rpc("get_orderbreakdown_byorderid", {
+    input_order_id: orderId,
+  });
 
   if (error) {
     throw new Error(error.message);
@@ -48,14 +49,14 @@ Deno.serve(async (req) => {
       },
     });
   }
+  ///*
   if (!JWT_SECRET) {
-    return new Response(JSON.stringify({
-      message: `JWT error: ${JWT_SECRET}`,
-    }), { status: 401, headers: {
-      "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
-    }, });
+    return new Response(
+      JSON.stringify({
+        message: `JWT error: ${JWT_SECRET}`,
+      }),
+      { status: 401 }
+    );
   }
 
   const authHeader = req.headers.get("Authorization");
@@ -67,50 +68,54 @@ Deno.serve(async (req) => {
   const token = authHeader.split(" ")[1];
   const JWT_SECRET_KEY = await getCryptoKey(JWT_SECRET);
   // Verify the JWT
-  const payload = await verify(token,JWT_SECRET_KEY);
-
+  const payload = await verify(token, JWT_SECRET_KEY);
+  //*/
   const url = new URL(req.url);
-  const userId = url.searchParams.get("userId");
-  
-  if (userId == "") {
-    return new Response("Invalid user ID", { status: 400, headers: {
-      "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
-    }, });
+  const orderId = url.searchParams.get("orderId");
+
+  if (orderId == "") {
+    return new Response("Invalid order ID", { status: 400 });
   }
 
   try {
-    const eventorderDetails = await getPreviousEventByUserId(userId??"");
-    
-    if (!eventorderDetails) {
-      return new Response("Order not found", { status: 404 });
+    const { data, error } = await supabase
+    .from('order')
+    .select('total_amount')
+    .eq('id', orderId)
+    .single();
+
+    const breakdownDetails = await getOrderBreakdown(orderId ?? "");
+
+    if (!breakdownDetails) {
+      return new Response("Tickets not found", { status: 404 });
     }
 
-    return new Response(JSON.stringify({ events: eventorderDetails }), {
+    // Construct the final response
+    const response = {
+      order_id:orderId,
+      total_price:data,
+      breakdown: breakdownDetails,
+    };
+
+    return new Response(JSON.stringify(response), {
       headers: {
         "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
+        "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
       },
     });
   } catch (error) {
     console.error(error);
-    return new Response("Internal Server Error", { status: 500, headers: {
-      "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
-    }, });
+    return new Response("Internal Server Error", { status: 500 });
   }
- 
-})
+});
 
 /* To invoke locally:
 
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
   2. Make an HTTP request:
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/getpreviouseventbyuserId' \
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/getorderbreakdownbyorderId' \
     --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
     --header 'Content-Type: application/json' \
     --data '{"name":"Functions"}'

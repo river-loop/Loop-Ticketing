@@ -14,6 +14,7 @@ const beam_API_key = "w4LMUeoOf6q+7MkINc7l234dL/HyH6DAIs8CcROR8ys="; //Playgroun
 const beamMerchantId = "playground15";//Playground
 //const beamMerchantId = "loop";//Live
 
+
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_ANON_KEY")!
@@ -37,8 +38,8 @@ interface PurchaseRequest {
   beamUrl: string;
   expiry: string;
   eventName: string;
-  buyerName: string;
   amount: number;
+  amountFinal: number;
   redirectUrl: string;
   eventId: string;
   orderId: string;
@@ -75,8 +76,8 @@ async function purchaseBeamcheckout(req: Request): Promise<Response> {
     "beamUrl",
     "expiry",
     "eventName",
-    "buyerName",
     "amount",
+    "amountFinal",
     "redirectUrl",
     "eventId",
     "orderId"
@@ -131,11 +132,11 @@ async function purchaseBeamcheckout(req: Request): Promise<Response> {
     order: {
       currencyCode: "THB",
       description: body.eventName,
-      merchantReference: body.buyerName,
+      merchantReference: body.eventName,
       merchantReferenceId: "LoopTicketing",
-      netAmount: body.amount,
+      netAmount: body.amountFinal,
       orderItems: formattedOrderItems,
-      totalAmount: body.amount,
+      totalAmount: body.amountFinal,
     },
     redirectUrl: body.redirectUrl,
     supportedPaymentMethods: ["qrThb"],

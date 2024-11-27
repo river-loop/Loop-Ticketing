@@ -6,8 +6,8 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.45.4'
 import { verify } from "https://deno.land/x/djwt@v2.4/mod.ts";
 
-//const Allow_origin_url_prd="https://kickoff.in.th";
-const Allow_origin_url_prd="*"
+const Allow_origin_url_prd="https://kickoff.in.th";
+//const Allow_origin_url_prd="*"
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_ANON_KEY")!
