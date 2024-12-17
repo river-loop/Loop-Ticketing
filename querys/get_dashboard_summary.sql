@@ -6,6 +6,8 @@ RETURNS TABLE (
     remaining_tickets INT
 )
 LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
 AS $$
     SELECT 
         -- Sum of final_amount for completed orders

@@ -13,6 +13,8 @@ RETURNS TABLE (
   created_at timestamp
 ) 
 LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT DISTINCT  -- Add DISTINCT to remove duplicates
     t.id AS ticket_id,

@@ -12,6 +12,8 @@ RETURNS TABLE (
   stadium_name text
 ) 
 LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT DISTINCT  -- Add DISTINCT to remove duplicates
     t.id AS event_id,

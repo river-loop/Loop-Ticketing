@@ -7,7 +7,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import { verify } from "https://deno.land/x/djwt@v2.4/mod.ts";
 //const Allow_origin_url_prd="https://kickoff.in.th"
 //const Allow_origin_url_prd = "https://loop-ticketing-test-3hanuu.flutterflow.app";
-const Allow_origin_url_prd="*"
+const Allow_origin_url_prd = "*";
 //import { qrcode } from "https://deno.land/x/qrcode@v2.0.0/mod.ts";
 
 const supabase = createClient(
@@ -25,7 +25,7 @@ async function getCryptoKey(secret: string): Promise<CryptoKey> {
     keyData,
     { name: "HMAC", hash: { name: "SHA-256" } },
     false,
-    ["sign", "verify"]
+    ["sign", "verify"],
   );
 }
 
@@ -41,7 +41,6 @@ interface TicketBuyModel {
 }
 
 async function userBuyTicket(req: Request): Promise<Response> {
-
   if (req.method === "POST") {
     try {
       const body = await req.json();
@@ -53,7 +52,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
         pTotalAmount,
         lstTicket,
         pNetAmount,
-        pChargeAmount
+        pChargeAmount,
       } = body;
 
       let tickets: TicketBuyModel[] = [];
@@ -75,7 +74,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
       }
 
       let totalticket = 0;
-      
+
       for (const ticket of tickets) {
         const { zoneId, buyCount, ticketsAmount } = ticket;
         for (let i = 0; i < buyCount; i++) {
@@ -134,6 +133,62 @@ async function userBuyTicket(req: Request): Promise<Response> {
             `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${ticket_id}`;
           //const ticketQR = await qrcode(ticketCode, { size: 200 });
 
+          //Add 06/12/2024 Check tickets are available before paying again
+          const { data: maxlimitData, error: maxlimitData_error } =
+            await supabase
+              .from("ticket_quota")
+              .select("max_limit")
+              .eq("event_id", pEventId)
+              .eq("stadium_zone_id", zoneId)
+              .single();
+
+          const { data: ticketData, error: ticketData_error } = await supabase
+            .from("ticket")
+            .select("id", { count: "exact" }) // Use exact count.
+            .eq("event_id", pEventId)
+            .eq("stadium_zone_id", zoneId)
+            .neq("status", "CANCELLED"); // Exclude 'CANCELLED' status.
+
+          if (maxlimitData_error || ticketData_error) {
+            return new Response(
+              JSON.stringify({ statuscode: 500, message: "Error Occurred" }),
+              {
+                status: 500,
+                headers: {
+                  "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
+                  "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
+                  "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
+                },
+              },
+            );
+          }
+
+          const maxLimit = maxlimitData?.max_limit || 0;
+          const soldTickets = ticketData?.length || 0;
+
+          const remainingTickets = maxLimit - soldTickets;
+
+          if (remainingTickets < 1) {
+            const { data: zoneData } = await supabase
+              .from("stadium_zone")
+              .select("name")
+              .eq("id", zoneId)
+              .single();
+
+            deleteOrderRelatedData(orderId);
+
+            return new Response(
+              JSON.stringify({
+                statuscode: 400,
+                success: false,
+                message: "No tickets available for " + zoneData?.name,
+                category: "soldout",
+              }),
+              { status: 400 },
+            );
+          }
+          //End Add
+
           const ticketInsert = await supabase
             .from("ticket")
             .insert([{
@@ -160,7 +215,6 @@ async function userBuyTicket(req: Request): Promise<Response> {
         }
       }
 
-
       if (isError == false) {
         return new Response(
           JSON.stringify({
@@ -172,8 +226,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
           {
             status: 200,
             headers: {
-              "Access-Control-Allow-Origin":
-                Allow_origin_url_prd, // Allow only your specific domain
+              "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
               "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
               "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
             },
@@ -187,8 +240,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
           {
             status: 500,
             headers: {
-              "Access-Control-Allow-Origin":
-                Allow_origin_url_prd, // Allow only your specific domain
+              "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
               "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
               "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
             },
@@ -207,8 +259,7 @@ async function userBuyTicket(req: Request): Promise<Response> {
         {
           status: 500,
           headers: {
-            "Access-Control-Allow-Origin":
-              Allow_origin_url_prd, // Allow only your specific domain
+            "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
             "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
             "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
           },
@@ -249,43 +300,51 @@ function generateRandomString(length: number): string {
 }
 
 Deno.serve(async (req) => {
-
   // Handle preflight requests
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, {
       headers: {
         "Access-Control-Allow-Origin": Allow_origin_url_prd,
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Max-Age": "86400" // Cache the preflight response for 24 hours
+        "Access-Control-Max-Age": "86400", // Cache the preflight response for 24 hours
       },
     });
   }
-  
+
   if (!JWT_SECRET) {
-    return new Response(JSON.stringify({
-      message: `JWT error: ${JWT_SECRET}`,
-    }), { status: 401, headers: {
-      "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
-    }, });
+    return new Response(
+      JSON.stringify({
+        message: `JWT error: ${JWT_SECRET}`,
+      }),
+      {
+        status: 401,
+        headers: {
+          "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
+          "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
+        },
+      },
+    );
   }
 
   const authHeader = req.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return new Response("Unauthorized: No token provided", { status: 401, headers: {
-      "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",  // Allowed headers
-    }, });
+    return new Response("Unauthorized: No token provided", {
+      status: 401,
+      headers: {
+        "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS", // Allowed methods
+        "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
+      },
+    });
   }
 
   // Extract the token from the Authorization header
   const token = authHeader.split(" ")[1];
   const JWT_SECRET_KEY = await getCryptoKey(JWT_SECRET);
   // Verify the JWT
-  const payload = await verify(token,JWT_SECRET_KEY);
+  const payload = await verify(token, JWT_SECRET_KEY);
 
   return await userBuyTicket(req);
 });

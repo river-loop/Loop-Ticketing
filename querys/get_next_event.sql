@@ -1,4 +1,5 @@
-create function get_previous_event (input_user_id uuid) returns table (
+CREATE FUNCTION get_next_event(input_user_id uuid) 
+RETURNS TABLE (
   order_id text,
   event_id text,
   event_name text,
@@ -9,13 +10,16 @@ create function get_previous_event (input_user_id uuid) returns table (
   event_year text,
   event_month text,
   event_day text,
+  event_time text,
   start_date timestamp with time zone
-) language sql 
+) 
+LANGUAGE sql 
 SECURITY DEFINER
-SET search_path = public as $$
+SET search_path = public
+AS $$
  SELECT
     od.id AS order_id,
-    ev.id AS event_id,
+    od.event_id AS event_id,
     ev.name AS event_name,
     ev.coverphoto_url AS coverphoto_url,
     s.name AS stadium_name,
@@ -24,6 +28,7 @@ SET search_path = public as $$
     TO_CHAR(ev.start_date, 'YYYY') AS event_year,
     TO_CHAR(ev.start_date, 'FMMonth') AS event_month,
     TO_CHAR(ev.start_date, 'DD') AS event_day,
+    CONCAT(TO_CHAR(ev.start_date, 'HH24:MI'), ' - ', TO_CHAR(ev.end_date, 'HH24:MI')) AS event_time,  -- Format time range
     ev.start_date
   FROM 
     "order" AS od
@@ -36,9 +41,9 @@ SET search_path = public as $$
   WHERE 
     od.user_id = input_user_id
     AND od.status = 'COMPLETED'
-    AND ev.status = 'expired'
-    AND ev.end_date < NOW()  -- Only previous events
+    AND ev.status = 'sale'
+    AND ev.end_date > NOW()  -- Only upcoming events
   ORDER BY 
-    ev.start_date DESC
-
+    ev.start_date ASC  -- Order by the next event
+  LIMIT 1;  -- Return only the next event
 $$;

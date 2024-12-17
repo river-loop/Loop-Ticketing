@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
     return new Response(null, {
       headers: {
         "Access-Control-Allow-Origin": Allow_origin_url_prd,
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Methods": "POST, GET, PUT, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
         "Access-Control-Max-Age": "86400", // Cache the preflight response for 24 hours
       },
@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
       status: 405,
       headers: {
         "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
-        "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
+        "Access-Control-Allow-Methods": "POST, PUT, OPTIONS", // Allowed methods
         "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
       },
     });
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
           status: 400,
           headers: {
             "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
-            "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
+            "Access-Control-Allow-Methods": "POST,PUT, OPTIONS", // Allowed methods
             "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
           },
         }
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
           status: 400,
           headers: {
             "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
-            "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
+            "Access-Control-Allow-Methods": "POST,PUT, OPTIONS", // Allowed methods
             "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
           },
         }
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
         status: 200,
         headers: {
           "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
-          "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
+          "Access-Control-Allow-Methods": "POST,PUT, OPTIONS", // Allowed methods
           "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
         },
       }
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
         status: 500,
         headers: {
           "Access-Control-Allow-Origin": Allow_origin_url_prd, // Allow only your specific domain
-          "Access-Control-Allow-Methods": "POST, OPTIONS", // Allowed methods
+          "Access-Control-Allow-Methods": "POST,PUT, OPTIONS", // Allowed methods
           "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allowed headers
         },
       }

@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
       }
   
       const emaildata = await response.json();
-      return new Response(JSON.stringify({ message: "Email sent", emaildata }), {
+      return new Response(JSON.stringify({ message: "Reset Password email sent", emaildata }), {
         status: 200,
         headers: corsHeaders
       });

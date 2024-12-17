@@ -1,4 +1,4 @@
-create function get_previous_event (input_user_id uuid) returns table (
+create function get_future_event (input_user_id uuid) returns table (
   order_id text,
   event_id text,
   event_name text,
@@ -9,10 +9,12 @@ create function get_previous_event (input_user_id uuid) returns table (
   event_year text,
   event_month text,
   event_day text,
-  start_date timestamp with time zone
+  start_date timestamp with time zone,
+  purchase_at timestamp
 ) language sql 
 SECURITY DEFINER
-SET search_path = public as $$
+SET search_path = public
+as $$
  SELECT
     od.id AS order_id,
     ev.id AS event_id,
@@ -24,7 +26,8 @@ SET search_path = public as $$
     TO_CHAR(ev.start_date, 'YYYY') AS event_year,
     TO_CHAR(ev.start_date, 'FMMonth') AS event_month,
     TO_CHAR(ev.start_date, 'DD') AS event_day,
-    ev.start_date
+    ev.start_date,
+    od.purchase_at
   FROM 
     "order" AS od
   JOIN 
@@ -36,9 +39,9 @@ SET search_path = public as $$
   WHERE 
     od.user_id = input_user_id
     AND od.status = 'COMPLETED'
-    AND ev.status = 'expired'
-    AND ev.end_date < NOW()  -- Only previous events
+    AND ev.status = 'sale'
+    AND ev.start_date > NOW()  -- Only future events
   ORDER BY 
-    ev.start_date DESC
+    ev.start_date ASC, od.purchase_at ASC
 
 $$;

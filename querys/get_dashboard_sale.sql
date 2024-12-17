@@ -10,6 +10,8 @@ RETURNS TABLE (
   sort_order int
 )
 LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
 AS $$
 SELECT * from(
   SELECT 

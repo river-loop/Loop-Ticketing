@@ -7,6 +7,8 @@ RETURNS TABLE(
     total_ticket_price float
 )
 LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public 
 AS $$
    SELECT 
         event.name AS event_name,

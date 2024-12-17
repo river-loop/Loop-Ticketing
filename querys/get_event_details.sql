@@ -1,23 +1,25 @@
 CREATE OR REPLACE FUNCTION get_event_details(event_id uuid)
 RETURNS TABLE (
-  event_id text,
-  event_name text,
-  event_description text,
-  event_date text,  -- Formatted date
-  event_time text,  -- Formatted time
-  status text,
-  event_coverphoto_url text,
-  ticket_max_buy int,
-  partner_id text,
-  commission_rate int,
-  commission_type text,
-  stadium_id text,
-  stadium_name text,
-  location_address text,
-  location_maplink text
+    event_id text,
+    event_name TEXT,
+    event_description TEXT,
+    event_date TEXT,
+    event_time TEXT,
+    status TEXT,
+    event_coverphoto_url TEXT,
+    ticket_max_buy INT,
+    partner_id text,
+    commission_rate NUMERIC,
+    commission_type TEXT,
+    stadium_id text,
+    stadium_name TEXT,
+    location_address TEXT,
+    location_maplink TEXT
 ) 
 LANGUAGE sql
-AS $$
+SECURITY DEFINER
+SET search_path = public AS $$
+    
   SELECT DISTINCT  -- Add DISTINCT to remove duplicates
     ev.id AS event_id,
     ev.name AS event_name, 
@@ -44,4 +46,5 @@ AS $$
     location AS l ON s.location_id = l.id
   WHERE 
     ev.id = event_id;
+
 $$;
